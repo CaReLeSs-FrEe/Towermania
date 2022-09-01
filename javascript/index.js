@@ -6,7 +6,17 @@ const myGameArea = {
     this.canvas.height = 480;
     this.context = this.canvas.getContext("2d");
     this.interval = setInterval(updateGameArea, 5);
-  },
+    },
+startOver: function(){
+    let btn = window.addEventListener('Click');
+    btn.onclick = (event) => {
+        myGameArea.clear();
+        myGameArea.start();
+    };
+    // myGameArea.clear()
+    // myGameArea.start()
+    
+},
   clear: function () {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   },
@@ -35,7 +45,7 @@ class Player {
 
   newPos() {
     this.x += this.speedX;
-    this.y += this.speedY;
+    this.y += this.speedY 
   }
   
   left() {
@@ -53,12 +63,22 @@ class Player {
   bottom() {
     return this.y + this.height;
   }
- 
-  crashWith(obstacle) {
-    return !(this.bottom() < obstacle.top() || this.top() > obstacle.bottom() || this.right() < obstacle.left() || this.left() > obstacle.right());
-  }
+  
+  //crashWith(obstacle) {
+    // return !(this.bottom() < obstacle.top() || this.top() > obstacle.bottom() || this.right() < obstacle.left() || this.left() > obstacle.right());
+   standOn() {
+    return this.bottom() >= myObstacles.height + this.height
+   } 
+  
+  fallUnder() {
+    if((this.bottom() - (this.height * .75)) > myGameArea.canvas.height) {
+        alert('GAME OVER!', window.location.reload());
+    }
+        
+       
+    }
 }
-const myObstacles = [
+  const myObstacles = [
   new Player(Math.random() * 720, myGameArea.canvas.height, 720, 30, "brown"),
   new Player(Math.random() * 720, myGameArea.canvas.height, 70, 30, "brown"),
   new Player(Math.random() * 720, myGameArea.canvas.height, 100, 30, "brown"),
@@ -66,37 +86,43 @@ const myObstacles = [
 
 const player = new Player(260, 360, 30, 50, "black");
 
-document.addEventListener("keydown", (event) => {
-  player.speedY = 0;
-  player.speedX = 0;
+const keys = {} // { 'Space': false, 'ArrowUp': false }
+ 
+    window.addEventListener("keydown", (event) => {
+    // store an entry for every key pressed
+        keys[event.code] = true;
+ 
+        if (keys['ArrowUp']) {
+            player.speedY -= 1;
+        }
+        if (keys['Space']) {
+            player.speedY -= 1;
+        }
+        if (keys['ArrowLeft']) {
+            player.speedX -= 1;
+        }
+        if (keys['ArrowRight']) {
+            player.speedX += 1;
+        }
+    }, false);
+ 
+  window.addEventListener("keyup",  (event) => {
+    // mark keys that were released
+        keys[event.code] = false;
+        player.speedX = 0;
+        player.speedY = 1;
+    }, false);
 
-
-  switch (event.code) {
-    case "Space": // spacebar
-      player.speedY -= 1;
-
-      break;
-    case "ArrowUp": // up arrow
-      player.speedY -= 1;
-      break;
-    case "ArrowLeft": // left arrow
-      player.speedX -= 1;
-      break;
-    case "ArrowRight": // right arrow
-      player.speedX += 1;
-      break;
-  }
-});
 // 120 < x < 600
 const updatePlatforms = () => {
-  for (i = 0; i > myObstacles.length; i++) {
-    myObstacles[i].y -= -1;
+  for (i = 0; i < myObstacles.length; i++) {
+    myObstacles[i].y += .5;
     myObstacles[i].draw();
     
   }
   myGameArea.frames += 1;
   if (myGameArea.frames % 120 === 0) {
-    let y = myGameArea.canvas.height;
+    let y = 0;
     let minWidth = 150;
     let maxWidth = 250;
     let width = Math.floor(
@@ -107,34 +133,33 @@ const updatePlatforms = () => {
     let gap = Math.floor(Math.random() * (maxGap - minGap + 5) + minGap);
     myObstacles.push(new Player(Math.random() * 720, y, width, 30, "brown"));
   }
+  if(myObstacles >= myGameArea.canvas.height)
+  delete myObstacles[i]
+  console.log(myObstacles)
 };
+
 const checkGameOver = () => {
-    const crashed = myObstacles.some(function (obstacle) {
-      return player.crashWith(obstacle);
-    });
-  
-    if (fallOffScreen) {
-      myGameArea.stop();
-    }
+    player.fallUnder();
+
+    
 }
   
 myGameArea.start()
 // const platforms = new Platforms();
 
-document.addEventListener("keyup", (event) => {
-  player.speedX = 0;
-  player.speedY = .5;
-  
-
-});
+// document.addEventListener("keyup", (event) => {
+//   player.speedX = 0;
+//   player.speedY = .5;
+// });
 
 function updateGameArea() {
   myGameArea.clear();
   // update the player's position before drawing
   player.newPos();
+  player.standOn();
   player.draw();
   updatePlatforms();
-  //   checkGameOver();
+  checkGameOver();
 }
 
 //     draw() {
