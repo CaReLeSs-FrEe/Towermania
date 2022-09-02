@@ -89,8 +89,12 @@ window.addEventListener('keydown', e => {
                 myPlayer.canJump = false;
             }
             break;
-        case 'ArrowDown':
-            console.log('press down')
+        case 'Space':
+            console.log('press space')
+            if(myPlayer.canJump){
+                myPlayer.vy = -10;
+                myPlayer.canJump = false;
+            }
             break;
         case 'ArrowLeft':
             console.log('press left')
